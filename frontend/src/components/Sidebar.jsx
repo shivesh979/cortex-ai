@@ -61,7 +61,9 @@ const [showBilling, setShowBilling] =useState(false);
   );
 
   /* ── Collapsed rail — desktop only ── */
-  const CollapsedRail = () => (
+  /* Plain render functions (not components) so they aren't remounted each
+     render, keeping their state stable and satisfying react-hooks lint. */
+  const renderCollapsedRail = () => (
     <div className="hidden lg:flex flex-col items-center w-[56px] h-screen bg-[#0A0A0A] border-r border-[#262626] py-4 gap-1 shrink-0">
       <button
         onClick={() => setCollapsed(false)}
@@ -109,7 +111,7 @@ const [showBilling, setShowBilling] =useState(false);
   );
 
   /* ── Full sidebar content ── */
-  const SidebarContent = () => (
+  const renderSidebarContent = () => (
     <div className="flex flex-col h-full">
 
       {/* Header */}
@@ -254,7 +256,7 @@ const [showBilling, setShowBilling] =useState(false);
     </div>
   );
 
-  if (collapsed) return <CollapsedRail />;
+  if (collapsed) return renderCollapsedRail();
 
   return (
     <>
@@ -285,7 +287,7 @@ const [showBilling, setShowBilling] =useState(false);
           : "-translate-x-full invisible pointer-events-none lg:translate-x-0 lg:visible lg:pointer-events-auto"
         }
       `}>
-        <SidebarContent />
+        {renderSidebarContent()}
       </div>
 
 <BillingDrawer

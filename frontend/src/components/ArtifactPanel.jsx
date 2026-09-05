@@ -46,7 +46,9 @@ ${htmlFile?.content || ""}
 
 
   /* ── Shared code panel content ── */
-  const PanelContent = ({ onClose }) => (
+  /* Plain render function (not a component) so it isn't remounted on every
+     render — keeps editor/tab state stable and satisfies react-hooks lint. */
+  const renderPanel = (onClose) => (
     <div className="flex flex-col h-full bg-[#0A0A0A]">
 
       {/* Header */}
@@ -162,7 +164,7 @@ ${htmlFile?.content || ""}
           <>
             <motion.div key="mob-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
             <motion.div key="mob-drawer" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.25, ease: "easeInOut" }} className="lg:hidden fixed inset-y-0 right-0 z-50 w-[88vw] max-w-[420px] border-l border-[#262626] overflow-hidden">
-              <PanelContent onClose={() => setMobileOpen(false)} />
+              {renderPanel(() => setMobileOpen(false))}
             </motion.div>
           </>
         )}
@@ -171,7 +173,7 @@ ${htmlFile?.content || ""}
       <AnimatePresence initial={false}>
         {!collapsed ? (
           <motion.div key="open" initial={{ width: 0, opacity: 0 }} animate={{ width: "clamp(340px, 38%, 680px)", opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.22, ease: "easeInOut" }} className="hidden lg:flex h-full border-l border-[#262626] flex-col overflow-hidden shrink-0">
-            <PanelContent />
+            {renderPanel()}
           </motion.div>
         ) : (
           <motion.div key="collapsed" initial={{ width: 0, opacity: 0 }} animate={{ width: 48, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.22, ease: "easeInOut" }} className="hidden lg:flex h-full border-l border-[#262626] bg-[#0A0A0A] flex-col items-center py-4 gap-3 shrink-0">

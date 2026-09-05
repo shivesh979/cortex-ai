@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────
+  # Lint & Build Check — Frontend
+  # ─────────────────────────────────────
+  frontend-ci:
+    name: Frontend — Lint & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build (production check)
+        run: npm run build
+        env:
+          # Dummy values — only used to verify the build compiles cleanly
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || 'ci-placeholder' }}
+          VITE_SERVER_URL: https://placeholder.onrender.com
+          VITE_RAZORPAY_KEY: rzp_test_placeholder
+
+  # ─────────────────────────────────────
+  # Lint Check — Backend services
+  # ─────────────────────────────────────
+  backend-ci:
+    name: Backend — Syntax Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: gateway, path: backend/gateway }
+          - { name: auth, path: backend/services/auth }
+          - { name: chat, path: backend/services/chat }
+          - { name: billing, path: backend/services/billing }
+          - { name: agent, path: backend/services/agent }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.service.path }}/package-lock.json
+
+      - name: Install dependencies (${{ matrix.service.name }})
+        working-directory: ${{ matrix.service.path }}
+        run: npm ci
+
+      - name: Syntax check (${{ matrix.service.name }})
+        working-directory: ${{ matrix.service.path }}
+        run: node --check index.js

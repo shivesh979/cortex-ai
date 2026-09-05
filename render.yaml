@@ -1,0 +1,98 @@
+# ============================================================
+# Cortex AI — Render Blueprint (free-tier compatible)
+#
+# Free tier notes:
+#  - `cortex-frontend` (static) + `cortex-backend` (web) both run
+#    on Render's free tier. Free web services pause when idle and
+#    the account is limited to a monthly free-instance-hour budget.
+#  - Redis is not provided by Render for free. Use a managed Redis
+#    (e.g. Upstash free tier) and put its URL in REDIS_URL.
+#
+# Architecture: all backend processes (gateway + auth + chat + agent)
+# share ONE container and talk to each other over localhost. Only the
+# gateway is exposed publicly. See backend/start-all.js.
+#
+# All secrets are intentionally NOT in this file. Variables listed with
+# `sync: false` must be entered manually under:
+#   Service > Environment  >  "Set from .env" / "Manual"
+# ============================================================
+
+services:
+
+  # ---------------- FRONTEND (Static Site, free tier) ----------------
+  - type: web
+    runtime: static
+    name: cortex-frontend
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Firebase client config (public by design, but stored as a secret
+      # in the dashboard so it is never written to the repository)
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      # Public URL of the deployed API Gateway,
+      # e.g. https://cortex-backend.onrender.com
+      - key: VITE_SERVER_URL
+        sync: false
+      # Razorpay key id used by the client checkout (public by design)
+      - key: VITE_RAZORPAY_KEY
+        sync: false
+
+  # ---------------- BACKEND (single web service, free tier) ----------------
+  # Runs the API Gateway (public, port 8000) plus Auth/Chat/Agent services
+  # (internal, ports 8001-8003) in the same container.
+  - type: web
+    name: cortex-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /
+    envVars:
+      # PORT is injected by Render for web services; the gateway binds to it
+      # dynamically (process.env.PORT || 8000). Do not hardcode it here.
+      # Frontend origin allowed by CORS, e.g. https://cortex-frontend.onrender.com
+      - key: FRONTEND_URL
+        sync: false
+      # Managed Redis (Upstash free plan) shared by gateway/auth/agent
+      - key: REDIS_URL
+        sync: false
+      - key: MONGODB_URL
+        sync: false
+      # Internal links within the container (no public exposure)
+      - key: AUTH_SERVICE
+        value: http://localhost:8001
+      - key: CHAT_SERVICE
+        value: http://localhost:8002
+      - key: AGENT_SERVICE
+        value: http://localhost:8003
+      # Billing is merged into the gateway, hence both keys live here.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      # Auth service — Firebase Admin service account (full JSON, single line)
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      # Agent service — AI providers / storage / search
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_BUCKET_NAME
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false

@@ -51,7 +51,8 @@ const [showBilling, setShowBilling] =useState(false);
     dispatch(setSelectedConversation(conversation));
     const messages = await getMessages(conversation._id);
     dispatch(setMessages(messages));
-     dispatch(setArtifacts(messages.artifacts));
+     const lastArtifact = [...(messages || [])].reverse().find(m => m.artifacts && m.artifacts.length > 0);
+     dispatch(setArtifacts(lastArtifact?.artifacts || []));
   };
 
   const PanelIcon = () => (

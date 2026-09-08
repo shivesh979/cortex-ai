@@ -11,8 +11,11 @@ import { getCurrentUser } from "./controllers/user.controller.js";
 import cookieParser from "cookie-parser"
 import billingRouter from "./routes/billing.routes.js";
 import connectDB from "./config/db.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, ".env"), override: true });
 const app = express();
 const port=process.env.PORT || 8000
 app.use(cors({

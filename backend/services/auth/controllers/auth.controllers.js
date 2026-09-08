@@ -25,6 +25,12 @@ export const login = async (
   try {
 
 
+    if (!app) {
+      return res.status(503).json({
+        message: "Firebase is not configured. Please set FIREBASE_SERVICE_ACCOUNT."
+      });
+    }
+
     const { token } = req.body;
 
     const decoded =

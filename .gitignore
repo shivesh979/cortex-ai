@@ -36,3 +36,4 @@ Thumbs.db
 
 # Uploaded / generated files
 backend/services/agent/temp/
+backend/uploads/

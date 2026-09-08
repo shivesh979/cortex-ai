@@ -1,9 +1,16 @@
 import Redis from "ioredis";
 import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../../.env"), override: false });
+dotenv.config({ path: path.resolve(__dirname, ".env"), override: false });
 
-const redis = new Redis(process.env.REDIS_URL, {
+const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+
+const redis = new Redis(redisUrl, {
   maxRetriesPerRequest: 3,
   retryStrategy(times) {
     return Math.min(times * 500, 3000);

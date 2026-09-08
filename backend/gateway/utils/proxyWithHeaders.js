@@ -24,7 +24,7 @@ export const proxyWithUser =
       proxyReqOpts.headers[
        "x-user-avatar"
       ] =
-      srcReq.user.avatar
+      srcReq.user.avatar || ""
 
     }
 

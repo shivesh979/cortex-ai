@@ -1,11 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
 import dns from "node:dns";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import connectDB from "./config/db.js";
 import router from "./routes/agent.route.js";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, ".env"), override: true });
 
 if (process.env.CUSTOM_DNS_SERVERS) {
   dns.setServers(process.env.CUSTOM_DNS_SERVERS.split(","));

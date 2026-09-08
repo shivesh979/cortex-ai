@@ -2,7 +2,11 @@ import { ChatGoogleGenerativeAI }
   from "@langchain/google-genai";
 import { ChatGroq } from "@langchain/groq"
 import dotenv from "dotenv"
-dotenv.config()
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../.env"), override: true });
 import { ChatOpenRouter } from "@langchain/openrouter";
 
 // Normalize a pasted API key: strip surrounding quotes/whitespace that would
